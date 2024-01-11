@@ -47,4 +47,57 @@ contract TicTacToken {
     return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
   }
 
+  function _row(uint256 row) internal view returns (uint256) {
+    // we want to check the value of the rows
+    require(row < 3, "Invalid row");
+    uint256 idx = row * 3;
+
+    return board[idx] * board[idx + 1] * board[idx + 2];
+  }
+
+  function _col(uint256 col) internal view returns (uint256) {
+    require (col < 3, "Invalid col");
+    return board[col] * board[col + 3] * board[col + 6];
+  }
+
+  function _diag() internal view returns (uint256) {
+    return board[0] * board[4] * board[8];
+  }
+
+  function _antiDiag() internal view returns (uint256) {
+    return board[2] * board[4] * board[6];
+  }
+
+  function _checkWin(uint256 product) internal pure returns (uint256) {
+    if (product == 1) {
+      return _X;
+    }
+    
+    if (product == 8) {
+      return _O;
+    }
+
+    return _EMPTY;
+  }
+
+  function winner() public view returns (uint256) {
+    uint256[8] memory wins = [
+      _row(0),
+      _row(1),
+      _row(2),
+      _col(0),
+      _col(1),
+      _col(2),
+      _diag(),
+      _antiDiag()
+    ];
+
+    for (uint256 i; i < wins.length; i++) {
+      uint256 win = _checkWin(wins[i]);
+      if (win == _X || win == _O) return win;
+    }
+    return _EMPTY;
+
+  }
+
 }

@@ -68,4 +68,72 @@ contract TicTacTokenTest is DSTest {
     assertEq(_ttt.currentTurn(), _X);
   }
 
+  function test_checks_for_horizontal_win() public {
+    _ttt.markSpace(0, _X);
+    _ttt.markSpace(3, _O);
+    _ttt.markSpace(1, _X);
+    _ttt.markSpace(4, _O);
+    _ttt.markSpace(2, _X);
+    assertEq(_ttt.winner(), _X);
+  }
+
+  function test_checks_for_horizontal_win_row2() public {
+    _ttt.markSpace(3, _X);
+    _ttt.markSpace(0, _O);
+    _ttt.markSpace(4, _X);
+    _ttt.markSpace(1, _O);
+    _ttt.markSpace(5, _X);
+    assertEq(_ttt.winner(), _X);
+  }
+
+  function test_checks_for_vertical_win() public {
+    _ttt.markSpace(1, _X);
+    _ttt.markSpace(0, _O);
+    _ttt.markSpace(2, _X);
+    _ttt.markSpace(3, _O);
+    _ttt.markSpace(4, _X);
+    _ttt.markSpace(6, _O);
+    assertEq(_ttt.winner(), _O);
+  }
+
+  function test_checks_for_diag_win() public {
+    _ttt.markSpace(0, _X);
+    _ttt.markSpace(1, _O);
+    _ttt.markSpace(4, _X);
+    _ttt.markSpace(3, _O);
+    _ttt.markSpace(8, _X);
+    assertEq(_ttt.winner(), _X);
+  }
+
+  function test_checks_for_anti_diag_win() public {
+    _ttt.markSpace(2, _X);
+    _ttt.markSpace(1, _O);
+    _ttt.markSpace(4, _X);
+    _ttt.markSpace(3, _O);
+    _ttt.markSpace(6, _X);
+    assertEq(_ttt.winner(), _X);
+  }
+
+  function test_for_no_winner() public {
+    _ttt.markSpace(0, _X);
+    _ttt.markSpace(1, _O);
+    _ttt.markSpace(2, _X);
+    _ttt.markSpace(3, _O);
+    _ttt.markSpace(4, _X);
+    _ttt.markSpace(6, _O);
+    _ttt.markSpace(5, _X);
+    _ttt.markSpace(8, _O);
+    _ttt.markSpace(7, _X);
+    assertEq(_ttt.winner(), _EMPTY);
+  }
+
+  function test_empty_board_returns_no_winner() public {
+    assertEq(_ttt.winner(), _EMPTY);
+  }
+
+  function test_game_in_progress_returns_no_winner() public {
+    _ttt.markSpace(1, _X);
+    assertEq(_ttt.winner(), _EMPTY);
+  }
+
 } 
