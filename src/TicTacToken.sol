@@ -5,18 +5,40 @@ pragma solidity 0.8.23;
 // pure functions don't read or write to state, and can call other pure functions
 
 contract TicTacToken {
-  uint256[9] public board;
-  uint256 public turn;
-
   uint256 internal constant _EMPTY = 0;
   uint256 internal constant _X = 1;
   uint256 internal constant _O = 2;
+
+  uint256[9] public board;
+  uint256 public turn;
+  address public owner;
+  address public playerX;
+  address public playerO;
+
+  constructor(address _owner, address _playerX, address _playerO) {
+    owner = _owner;
+    playerX = _playerX;
+    playerO = _playerO;
+  }
+
+
+  function resetBoard() public {
+    require(msg.sender == owner, "Unauthorized");
+
+    delete board;
+  }
+
+  function msgSender() public view returns (address) {
+    return msg.sender;
+  }
 
   function getBoard() public view returns (uint256[9] memory) {
     return board;
   }
 
   function markSpace(uint256 space, uint256 symbol) public {
+    require(_validPlayer(), "Unauthorized");
+
     require(_validSymbol(symbol), "Invalid symbol");
 
     require(_emptySpace(space), "Already marked");
@@ -29,6 +51,10 @@ contract TicTacToken {
 
   function currentTurn() public view returns (uint256) {
     return turn % 2 == 0 ? _X : _O;
+  }
+
+  function _validPlayer() internal view returns (bool) {
+    return msg.sender == playerX || msg.sender == playerO;
   }
 
   function _validTurn(uint256 symbol) internal view returns (bool) {
@@ -98,13 +124,6 @@ contract TicTacToken {
     }
     return _EMPTY;
 
-  }
-
-  function resetBoard() public {
-    for (uint256 i; i < board.length; i++) {
-      board[i] = _EMPTY;
-    }
-    turn = 0;
   }
 
 }
