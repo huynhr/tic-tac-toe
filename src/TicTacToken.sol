@@ -21,10 +21,18 @@ contract TicTacToken {
     playerO = _playerO;
   }
 
-
-  function resetBoard() public {
+  modifier onlyAdmin() {
     require(msg.sender == owner, "Unauthorized");
+    _;
+  }
 
+  modifier onlyPlayers() {
+    require(msg.sender == playerX || msg.sender == playerO, "Unauthorized");
+    _;
+  }
+
+
+  function resetBoard() public onlyAdmin {
     delete board;
   }
 
@@ -36,15 +44,10 @@ contract TicTacToken {
     return board;
   }
 
-  function markSpace(uint256 space, uint256 symbol) public {
-    require(_validPlayer(), "Unauthorized");
-
-    require(_validSymbol(symbol), "Invalid symbol");
-
+  function markSpace(uint256 space) public onlyPlayers {
+    require(_validTurn(), "Not your turn");
     require(_emptySpace(space), "Already marked");
-
-    require(_validTurn(symbol), "Not your turn");
-
+    uint256 symbol = _getSymbol();
     board[space] = symbol;
     turn++;
   }
@@ -53,12 +56,24 @@ contract TicTacToken {
     return turn % 2 == 0 ? _X : _O;
   }
 
+  function _getSymbol() internal view returns (uint256) {
+    if (msg.sender == playerX) {
+      return _X;
+    }
+
+    if (msg.sender == playerO) {
+      return _O;
+    }
+
+    return _EMPTY;
+  }
+
   function _validPlayer() internal view returns (bool) {
     return msg.sender == playerX || msg.sender == playerO;
   }
 
-  function _validTurn(uint256 symbol) internal view returns (bool) {
-    return symbol == currentTurn();
+  function _validTurn() internal view returns (bool) {
+    return _getSymbol() == currentTurn();
   }
 
   function _emptySpace(uint256 space) internal view returns (bool) {
