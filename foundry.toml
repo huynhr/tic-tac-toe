@@ -4,6 +4,6 @@ out = 'out'
 libs = ['lib']
 verbosity = 2
 fuzz_runs = 5000
-solc_version = "0.8.10"
+solc_version = "0.8.23"
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

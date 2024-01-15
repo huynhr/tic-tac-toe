@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.10;
+pragma solidity 0.8.23;
 
 // view functions read from state but don't interact with them they can call pure functions
 // pure functions don't read or write to state, and can call other pure functions
@@ -98,6 +98,13 @@ contract TicTacToken {
     }
     return _EMPTY;
 
+  }
+
+  function resetBoard() public {
+    for (uint256 i; i < board.length; i++) {
+      board[i] = _EMPTY;
+    }
+    turn = 0;
   }
 
 }

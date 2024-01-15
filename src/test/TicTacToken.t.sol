@@ -1,4 +1,4 @@
-pragma solidity 0.8.10;
+pragma solidity 0.8.23;
 
 import "ds-test/test.sol";
 import "forge-std/Vm.sol";
@@ -18,7 +18,7 @@ contract TicTacTokenTest is DSTest {
   function test_has_empty_board() public {
     for (uint256 i = 0; i < 9; i++) {
       assertEq(_ttt.board(i), _EMPTY);
-    }
+    } 
   }
 
   function test_get_board() public {
@@ -134,6 +134,13 @@ contract TicTacTokenTest is DSTest {
   function test_game_in_progress_returns_no_winner() public {
     _ttt.markSpace(1, _X);
     assertEq(_ttt.winner(), _EMPTY);
+  }
+
+  function test_reset_board() public {
+    _ttt.markSpace(5, _X);
+    _ttt.resetBoard();
+    assertEq(_ttt.board(5), _EMPTY);
+    assertEq(_ttt.currentTurn(), _X);
   }
 
 } 
