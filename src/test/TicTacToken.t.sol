@@ -143,4 +143,8 @@ contract TicTacTokenTest is DSTest {
     assertEq(_ttt.currentTurn(), _X);
   }
 
+  function test_msg_sender() public {
+    assertEq(msg.sender, address(this));
+  }
+
 } 
