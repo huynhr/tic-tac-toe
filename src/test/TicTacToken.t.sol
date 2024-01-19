@@ -27,9 +27,9 @@ contract User {
     _vm = vm;
   }
 
-  function markSpace(uint256 space) public {
+  function markSpace(uint256 space, uint256 id) public {
     _vm.prank(_address);
-    _ttt.markSpace(space);
+    _ttt.markSpace(space, id);
   }
 }
 
@@ -57,40 +57,42 @@ contract TicTacTokenTest is DSTest {
   }
 
   function test_stores_player_X() public {
-        assertEq(_ttt.playerX(), _PLAYER_X);
+        (address playerXAddr,,) = _ttt.games(0);
+        assertEq(playerXAddr, _PLAYER_X);
     }
 
     function test_stores_player_O() public {
-        assertEq(_ttt.playerO(), _PLAYER_O);
+        (,address playerOAddr,) = _ttt.games(0);
+        assertEq(playerOAddr, _PLAYER_O);
     }
 
   function test_has_empty_board() public {
     for (uint256 i = 0; i < 9; i++) {
-      assertEq(_ttt.board(i), _EMPTY);
+      assertEq(_ttt.getBoard(0)[i], _EMPTY);
     } 
   }
 
   function test_auth_nonplayer_cannot_mark_space() public {
     _vm.expectRevert("Unauthorized");
-    _ttt.markSpace(0);
+    _ttt.markSpace(0, 0);
   }
 
   function test_auth_playerx_can_mark_space() public {
-    _playerX.markSpace(0);
+    _playerX.markSpace(0, 0);
 
-    assertEq(_ttt.board(0), _X);
+    assertEq(_ttt.getBoard(0)[0], _X);
   }
 
   function test_auth_playery_can_mark_space() public {
-    _playerX.markSpace(0);
-    _playerO.markSpace(1);
+    _playerX.markSpace(0, 0);
+    _playerO.markSpace(1, 0);
 
-    assertEq(_ttt.board(1), _O);
+    assertEq(_ttt.getBoard(0)[1], _O);
   }
 
   function test_get_board() public {
     uint256[9] memory expected = [_EMPTY, _EMPTY, _EMPTY, _EMPTY, _EMPTY, _EMPTY, _EMPTY, _EMPTY, _EMPTY];
-    uint256[9] memory actual = _ttt.getBoard();
+    uint256[9] memory actual = _ttt.getBoard(0);
 
     for (uint256 i = 0; i < 9; i++) {
       assertEq(actual[i], expected[i]);
@@ -98,94 +100,94 @@ contract TicTacTokenTest is DSTest {
   }
 
   function test_can_mark_space_with_X() public {
-    _playerX.markSpace(0);
-    assertEq(_ttt.board(0), _X);
+    _playerX.markSpace(0, 0);
+    assertEq(_ttt.getBoard(0)[0], _X);
   }
 
   function test_can_mark_space_with_O() public {
-    _playerX.markSpace(0);
-    _playerO.markSpace(1);
-    assertEq(_ttt.board(1), _O);
+    _playerX.markSpace(0, 0);
+    _playerO.markSpace(1, 0);
+    assertEq(_ttt.getBoard(0)[1], _O);
   }
 
   function test_cannot_overwrite_marked_space() public {
-    _playerX.markSpace(0);
+    _playerX.markSpace(0, 0);
 
     _vm.expectRevert("Already marked");
-    _playerO.markSpace(0);
+    _playerO.markSpace(0, 0);
   }
 
   function test_symbols_must_alternate() public {
-    _playerX.markSpace(0);
+    _playerX.markSpace(0, 0);
 
     _vm.expectRevert("Not your turn");
-    _playerX.markSpace(1);
+    _playerX.markSpace(1, 0);
   }
 
   function test_should_return_correct_turn() public {
     assertEq(_ttt.currentTurn(), _X);
-    _playerX.markSpace(0);
+    _playerX.markSpace(0, 0);
     assertEq(_ttt.currentTurn(), _O);
-    _playerO.markSpace(1);
+    _playerO.markSpace(1, 0);
     assertEq(_ttt.currentTurn(), _X);
   }
 
   function test_checks_for_horizontal_win() public {
-    _playerX.markSpace(0);
-    _playerO.markSpace(3);
-    _playerX.markSpace(1);
-    _playerO.markSpace(4);
-    _playerX.markSpace(2);
+    _playerX.markSpace(0, 0);
+    _playerO.markSpace(3, 0);
+    _playerX.markSpace(1, 0);
+    _playerO.markSpace(4, 0);
+    _playerX.markSpace(2, 0);
     assertEq(_ttt.winner(), _X);
   }
 
   function test_checks_for_horizontal_win_row2() public {
-    _playerX.markSpace(3);
-    _playerO.markSpace(0);
-    _playerX.markSpace(4);
-    _playerO.markSpace(1);
-    _playerX.markSpace(5);
+    _playerX.markSpace(3, 0);
+    _playerO.markSpace(0, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(1, 0);
+    _playerX.markSpace(5, 0);
     assertEq(_ttt.winner(), _X);
   }
 
   function test_checks_for_vertical_win() public {
-    _playerX.markSpace(1);
-    _playerO.markSpace(0);
-    _playerX.markSpace(2);
-    _playerO.markSpace(3);
-    _playerX.markSpace(4);
-    _playerO.markSpace(6);
+    _playerX.markSpace(1, 0);
+    _playerO.markSpace(0, 0);
+    _playerX.markSpace(2, 0);
+    _playerO.markSpace(3, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(6, 0);
     assertEq(_ttt.winner(), _O);
   }
 
   function test_checks_for_diag_win() public {
-    _playerX.markSpace(0);
-    _playerO.markSpace(1);
-    _playerX.markSpace(4);
-    _playerO.markSpace(3);
-    _playerX.markSpace(8);
+    _playerX.markSpace(0, 0);
+    _playerO.markSpace(1, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(3, 0);
+    _playerX.markSpace(8, 0);
     assertEq(_ttt.winner(), _X);
   }
 
   function test_checks_for_anti_diag_win() public {
-    _playerX.markSpace(2);
-    _playerO.markSpace(1);
-    _playerX.markSpace(4);
-    _playerO.markSpace(3);
-    _playerX.markSpace(6);
+    _playerX.markSpace(2, 0);
+    _playerO.markSpace(1, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(3, 0);
+    _playerX.markSpace(6, 0);
     assertEq(_ttt.winner(), _X);
   }
 
   function test_for_no_winner() public {
-    _playerX.markSpace(0);
-    _playerO.markSpace(1);
-    _playerX.markSpace(2);
-    _playerO.markSpace(3);
-    _playerX.markSpace(4);
-    _playerO.markSpace(6);
-    _playerX.markSpace(5);
-    _playerO.markSpace(8);
-    _playerX.markSpace(7);
+    _playerX.markSpace(0, 0);
+    _playerO.markSpace(1, 0);
+    _playerX.markSpace(2, 0);
+    _playerO.markSpace(3, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(6, 0);
+    _playerX.markSpace(5, 0);
+    _playerO.markSpace(8, 0);
+    _playerX.markSpace(7, 0);
     assertEq(_ttt.winner(), _EMPTY);
   }
 
@@ -194,18 +196,18 @@ contract TicTacTokenTest is DSTest {
   }
 
   function test_game_in_progress_returns_no_winner() public {
-    _playerX.markSpace(1);
+    _playerX.markSpace(1, 0);
     assertEq(_ttt.winner(), _EMPTY);
   }
 
   function test_reset_board() public {
-    _playerX.markSpace(3);
-    _playerO.markSpace(0);
-    _playerX.markSpace(4);
-    _playerO.markSpace(1);
-    _playerX.markSpace(5);
+    _playerX.markSpace(3, 0);
+    _playerO.markSpace(0, 0);
+    _playerX.markSpace(4, 0);
+    _playerO.markSpace(1, 0);
+    _playerX.markSpace(5, 0);
     _vm.prank(_OWNER);
-    _ttt.resetBoard();
+    _ttt.resetBoard(0);
     uint256[9] memory expected = [
         _EMPTY,
         _EMPTY,
@@ -217,7 +219,7 @@ contract TicTacTokenTest is DSTest {
         _EMPTY,
         _EMPTY
     ];
-    uint256[9] memory actual = _ttt.getBoard();
+    uint256[9] memory actual = _ttt.getBoard(0);
 
     for (uint256 i = 0; i < 9; i++) {
         assertEq(actual[i], expected[i]);
